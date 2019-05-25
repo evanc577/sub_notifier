@@ -3,7 +3,7 @@ Push notification on new post on subreddit
 
 ## Usage
 
-Make a file `pushover.yaml` and run the script
+Make a file `pushover.yaml` and run `python notifier.py`
 
 ### pushover.yaml
 ```yaml
