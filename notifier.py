@@ -3,6 +3,7 @@ import time
 import logging
 import html
 import sys
+import os
 from psaw import PushshiftAPI
 import yaml
 
@@ -21,7 +22,9 @@ logging.info('started script')
 
 # load pushover token and user
 try:
-    with open('pushover.yaml') as f:
+    path = os.path.dirname(os.path.realpath(__file__))	
+    path = os.path.join(path, 'pushover.yaml')
+    with open(path) as f:
         po_config = yaml.safe_load(f)
 except IOError:
     logging.error('could not open pushover.yaml')
