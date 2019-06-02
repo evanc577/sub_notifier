@@ -23,8 +23,8 @@ logging.info('started script')
 
 # load pushover token and user
 try:
-    path = os.path.dirname(os.path.realpath(__file__))	
-    path = os.path.join(path, 'pushover.yaml')
+    dirpath = os.path.dirname(os.path.realpath(__file__))	
+    path = os.path.join(dirpath, 'pushover.yaml')
     with open(path) as f:
         po_config = yaml.safe_load(f)
 except IOError:
@@ -46,7 +46,8 @@ except:
     logging.error('could not connect to Pushshift api')
     sys.exit(1)
 
-seen_ids = UnQLite('seen.udb')    # set of seen submissions
+path = os.path.join(dirpath, 'seen.udb')
+seen_ids = UnQLite(path)    # set of seen submissions
 prev_epoch = int(time.time())   # time of previous check
     
 while True:
