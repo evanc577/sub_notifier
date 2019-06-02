@@ -39,7 +39,11 @@ except:
     sys.exit(1)
 
 
-api = PushshiftAPI()
+try:
+    api = PushshiftAPI()
+except:
+    logging.error('could not connect to Pushshift api')
+    sys.exit(1)
 
 seen_ids = set()    # set of seen submissions
 prev_epoch = int(time.time())   # time of previous check
@@ -48,7 +52,12 @@ while True:
     cur_epoch = int(time.time())
 
     # get submissions
-    submissions = list(api.search_submissions(subreddit='dreamcatcher', after=prev_epoch-LOOKBACK, sort='asc'))
+    try:
+        submissions = list(api.search_submissions(subreddit='dreamcatcher', after=prev_epoch-LOOKBACK, sort='asc'))
+    except:
+        logging.error('could not retrieve submissions')
+        time.sleep(5)
+        continue
 
     prev_epoch = cur_epoch
 
@@ -63,21 +72,31 @@ while True:
         while first or response.status != 200:
             first = False
             logging.info('try: %.20s - https://redd.it/%s' % (s.title, s.id))
-            conn = http.client.HTTPSConnection("api.pushover.net:443")
-            conn.request("POST", "/1/messages.json",
-                         urllib.parse.urlencode({
-                             "token": token,
-                             "user": user,
-                             "title": "New post on r/dreamcatcher",
-                             "message": html.unescape(s.title),
-                             "timestamp": s.created_utc,
-                             "url": "https://redd.it/{}".format(s.id),
-                                                }),
-                         { "Content-type": "application/x-www-form-urlencoded" })
+            attempts = 1
+            try:
+                conn = http.client.HTTPSConnection("api.pushover.net:443")
+                conn.request("POST", "/1/messages.json",
+                             urllib.parse.urlencode({
+                                 "token": token,
+                                 "user": user,
+                                 "title": "New post on r/dreamcatcher",
+                                 "message": html.unescape(s.title),
+                                 "timestamp": s.created_utc,
+                                 "url": "https://redd.it/{}".format(s.id),
+                                                    }),
+                             { "Content-type": "application/x-www-form-urlencoded" })
 
-            # check response
-            response = conn.getresponse()
-            response.read()
+                # check response
+                response = conn.getresponse()
+                response.read()
+            except:
+                logging.error('error sending push notification, attempt %d' % attempts)
+                if attempts >= 3:
+                    break
+                else:
+                    attempts += 1
+                    continue
+
             if response.status == 200:  # ok
                 logging.info('received response %d ... ok' % (response.status))
                 break
