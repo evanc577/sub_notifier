@@ -68,6 +68,7 @@ while True:
         if s.id in seen_ids:
             continue
         seen_ids[s.id] = b'\x01'
+        seen_ids.commit()
 
         # push unseen submissions
         first = True
