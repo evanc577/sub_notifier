@@ -6,6 +6,7 @@ import sys
 import os
 from psaw import PushshiftAPI
 import yaml
+from unqlite import UnQLite
 
 LOOKBACK = 3600 * 24 # number of seconds back to check
 INTERVAL = 10   # number of seconds between checks
@@ -45,7 +46,7 @@ except:
     logging.error('could not connect to Pushshift api')
     sys.exit(1)
 
-seen_ids = set()    # set of seen submissions
+seen_ids = UnQLite('seen.udb')    # set of seen submissions
 prev_epoch = int(time.time())   # time of previous check
     
 while True:
@@ -65,7 +66,7 @@ while True:
     for s in submissions:
         if s.id in seen_ids:
             continue
-        seen_ids.add(s.id)
+        seen_ids[s.id] = b'\x01'
 
         # push unseen submissions
         first = True
