@@ -16,3 +16,4 @@ user: 'your pushover delivery user or group'
 * python 3
 * psaw
 * pyyaml
+* unqlite
